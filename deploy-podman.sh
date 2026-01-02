@@ -93,14 +93,49 @@ else
 fi
 echo ""
 
-# Step 4: Deploy to Kubernetes
-echo "Step 4: Deploying to Kubernetes..."
+# Step 4: Pull and load public images
+echo "Step 4: Pulling and loading public images..."
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "Pulling OpenTelemetry Collector..."
+if podman pull otel/opentelemetry-collector-contrib:0.93.0 ; then
+    echo "✅ OpenTelemetry Collector pulled"
+    echo "Loading into Minikube..."
+    if podman save otel/opentelemetry-collector-contrib:0.93.0 | minikube image load - ; then
+        echo "✅ OpenTelemetry Collector loaded"
+    else
+        echo "❌ Failed to load OpenTelemetry Collector"
+        exit 1
+    fi
+else
+    echo "❌ Failed to pull OpenTelemetry Collector"
+    exit 1
+fi
+echo ""
+
+echo "Pulling Ollama (this may take a few minutes, ~2GB)..."
+if podman pull ollama/ollama:latest ; then
+    echo "✅ Ollama pulled"
+    echo "Loading into Minikube..."
+    if podman save ollama/ollama:latest | minikube image load - ; then
+        echo "✅ Ollama loaded"
+    else
+        echo "❌ Failed to load Ollama"
+        exit 1
+    fi
+else
+    echo "❌ Failed to pull Ollama"
+    exit 1
+fi
+echo ""
+
+# Step 5: Deploy to Kubernetes
+echo "Step 5: Deploying to Kubernetes..."
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 kubectl apply -f k8s/
 echo ""
 
-# Step 5: Wait for pods
-echo "Step 5: Waiting for pods to be ready..."
+# Step 6: Wait for pods
+echo "Step 6: Waiting for pods to be ready..."
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "This may take 5-10 minutes for model download..."
 echo ""

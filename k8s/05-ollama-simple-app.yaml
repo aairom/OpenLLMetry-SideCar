@@ -36,7 +36,7 @@ spec:
       containers:
       # TraceLoop Sidecar - intercepts traffic and adds tracing
       - name: traceloop-sidecar
-        image: traceloop-sidecar:latest
+        image: localhost/traceloop-sidecar:latest
         imagePullPolicy: Never  # For Minikube local images
         ports:
         - name: proxy
@@ -63,7 +63,7 @@ spec:
       
       # Main Application - simple Ollama app without tracing code
       - name: ollama-simple-app
-        image: ollama-simple-app:latest
+        image: localhost/ollama-simple-app:latest
         imagePullPolicy: Never  # For Minikube local images
         ports:
         - name: http
