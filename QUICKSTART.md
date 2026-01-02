@@ -91,7 +91,18 @@ A complete tracing setup where:
 - At least 6GB RAM available
 - Docker or Podman for building images
 
-### Steps
+### Quick Start (Automated - Podman Users)
+
+**For Podman users, use the automated script:**
+```bash
+./deploy-podman.sh
+```
+
+This script handles all steps automatically. Skip to step 5 below to check status.
+
+**See [PODMAN-USERS.md](PODMAN-USERS.md) for complete Podman guide.**
+
+### Manual Steps
 
 1. **Start Minikube:**
    ```bash

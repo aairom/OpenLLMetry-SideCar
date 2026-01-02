@@ -80,29 +80,42 @@ minikube start
 
 ---
 
-### Issue 0.5: Using Podman Instead of Docker
+### Issue 0.5: Using Podman with Docker Compose
 
 **Symptoms:**
 ```
 unable to get image 'docker-compose-tr...'
-# Or other docker-compose errors with Podman
+Cannot connect to the Docker daemon at unix:///var/run/docker.sock
 ```
 
 **Cause:**
-- You're using Podman instead of Docker
-- docker-compose may not work properly with Podman
+- You have `docker compose` command installed (Docker Compose V2 plugin)
+- BUT you're using Podman as your container engine (not Docker)
+- `docker compose` tries to connect to Docker daemon which doesn't exist
+
+**How to Check:**
+```bash
+# Check what container engine you're using
+docker --version  # If this fails, you don't have Docker
+podman --version  # If this works, you're using Podman
+
+# Check if docker-compose is trying to use Docker
+docker compose version  # This command exists but won't work with Podman
+```
 
 **Solution:**
 
-**Option A: Use Podman Compose**
+**Option A: Use Podman Compose (For Docker Compose Workflow)**
 ```bash
-# Install podman-compose if not already installed
+# Install podman-compose
 # macOS: brew install podman-compose
 # Linux: pip install podman-compose
 
-# Use podman-compose instead
+# Use podman-compose instead of docker-compose
 cd docker-compose
 podman-compose up --build
+
+# Note: podman-compose syntax is identical to docker-compose
 ```
 
 **Option B: Use Kubernetes (Recommended for Podman users)**

@@ -4,9 +4,13 @@ This project demonstrates a **sidecar pattern** for adding distributed tracing t
 
 ## 📚 Documentation
 
+> **🐳 Using Podman?** See **[PODMAN-USERS.md](PODMAN-USERS.md)** for Podman-specific instructions
+
+- **[DIAGRAMS.md](DIAGRAMS.md)** - 📊 **All mermaid diagrams** (architecture, flows, deployment processes)
+- **[PODMAN-USERS.md](PODMAN-USERS.md)** - 🐳 **Essential guide for Podman users**
 - **[QUICK-REFERENCE.md](QUICK-REFERENCE.md)** - ⚡ Fast access to URLs, commands, and troubleshooting
 - **[QUICKSTART.md](QUICKSTART.md)** - Get started in 5 minutes
-- **[DEPLOYMENT.md](DEPLOYMENT.md)** - Complete deployment guide with step-by-step instructions and mermaid diagrams
+- **[DEPLOYMENT.md](DEPLOYMENT.md)** - Complete deployment guide with step-by-step instructions
 - **[TESTING.md](TESTING.md)** - Comprehensive testing guide with examples
 - **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - 🔧 Common issues and solutions
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** - Detailed architecture and design decisions
@@ -87,7 +91,22 @@ This project demonstrates a **sidecar pattern** for adding distributed tracing t
 
 ## Utility Scripts
 
-Five convenience scripts are provided for easy project management:
+Six convenience scripts are provided for easy project management:
+
+### 🐳 deploy-podman.sh (For Podman Users)
+**Automated deployment script specifically for Podman users:**
+```bash
+./deploy-podman.sh
+```
+- ✅ Checks all prerequisites (Podman, Minikube, kubectl)
+- ✅ Starts Minikube with proper resources
+- ✅ Builds images with Podman
+- ✅ Loads images into Minikube
+- ✅ Deploys to Kubernetes
+- ✅ Waits for pods to be ready
+- ✅ Shows access URLs and commands
+
+**See [PODMAN-USERS.md](PODMAN-USERS.md) for complete Podman guide.**
 
 ### 🚀 start-all.sh
 Interactive script to start services in either Docker Compose or Kubernetes:

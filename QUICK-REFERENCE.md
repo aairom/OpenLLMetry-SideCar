@@ -42,7 +42,13 @@ minikube ip
 # Select option 1 for Docker Compose
 ```
 
-**For Podman Users (Recommended: Kubernetes):**
+**For Podman Users (Automated - Recommended):**
+```bash
+./deploy-podman.sh
+```
+This automated script handles all steps: Minikube start, image builds, loading, deployment, and status checks.
+
+**For Podman Users (Manual):**
 ```bash
 # 1. Start Minikube
 minikube start --memory=6144 --cpus=4
@@ -61,6 +67,8 @@ kubectl apply -f k8s/
 # 5. Check status
 ./check-status.sh
 ```
+
+**See [PODMAN-USERS.md](PODMAN-USERS.md) for complete guide.**
 
 ### Stop Services
 ```bash
