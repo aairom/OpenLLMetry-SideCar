@@ -4,19 +4,17 @@ This project demonstrates a **sidecar pattern** for adding distributed tracing t
 
 ## 📚 Documentation
 
-> **🐳 Using Podman?** Start here: **[START-HERE-PODMAN.md](START-HERE-PODMAN.md)** ⭐
+> **🐳 Using Podman?** Read: **[PODMAN-COMPLETE-GUIDE.md](PODMAN-COMPLETE-GUIDE.md)** ⭐ (Everything in one place!)
 
 ### Quick Start Guides
-- **[START-HERE-PODMAN.md](START-HERE-PODMAN.md)** - 🐳 ⭐ **Complete step-by-step guide for Podman users**
+- **[PODMAN-COMPLETE-GUIDE.md](PODMAN-COMPLETE-GUIDE.md)** - 🐳 ⭐ **Complete guide for Podman users** (Setup, Testing, Troubleshooting)
 - **[QUICKSTART.md](QUICKSTART.md)** - 🐋 Quick start for Docker users (5 minutes)
 
-### Deployment & Configuration
+### Deployment & Testing
 - **[DEPLOYMENT.md](DEPLOYMENT.md)** - Complete deployment guide with step-by-step instructions
-- **[PODMAN-USERS.md](PODMAN-USERS.md)** - Detailed Podman deployment guide
 - **[TESTING.md](TESTING.md)** - Comprehensive testing guide with examples
 
 ### Troubleshooting & Reference
-- **[PODMAN-TROUBLESHOOTING.md](PODMAN-TROUBLESHOOTING.md)** - 🔧 Podman-specific troubleshooting
 - **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - General troubleshooting guide
 - **[QUICK-REFERENCE.md](QUICK-REFERENCE.md)** - ⚡ Fast access to URLs and commands
 
