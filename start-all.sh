@@ -140,20 +140,40 @@ case $choice in
         
         echo ""
         echo "Building container images..."
+        echo "(This may take a few minutes...)"
+        echo ""
         
         echo "  - Building traceloop-sidecar..."
         cd traceloop-sidecar
-        docker build -t traceloop-sidecar:latest . >/dev/null 2>&1
+        if docker build -t traceloop-sidecar:latest . > /tmp/build-sidecar.log 2>&1; then
+            echo "    ✓ traceloop-sidecar built successfully"
+        else
+            echo "    ✗ Failed to build traceloop-sidecar"
+            echo "    Check logs: cat /tmp/build-sidecar.log"
+            exit 1
+        fi
         cd ..
         
         echo "  - Building ollama-simple-app..."
         cd ollama-simple-app
-        docker build -t ollama-simple-app:latest . >/dev/null 2>&1
+        if docker build -t ollama-simple-app:latest . > /tmp/build-app.log 2>&1; then
+            echo "    ✓ ollama-simple-app built successfully"
+        else
+            echo "    ✗ Failed to build ollama-simple-app"
+            echo "    Check logs: cat /tmp/build-app.log"
+            exit 1
+        fi
         cd ..
         
         echo "  - Building ollama-app..."
         cd ollama-app
-        docker build -t ollama-app:latest . >/dev/null 2>&1
+        if docker build -t ollama-app:latest . > /tmp/build-instrumented.log 2>&1; then
+            echo "    ✓ ollama-app built successfully"
+        else
+            echo "    ✗ Failed to build ollama-app"
+            echo "    Check logs: cat /tmp/build-instrumented.log"
+            exit 1
+        fi
         cd ..
         
         echo ""

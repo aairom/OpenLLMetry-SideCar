@@ -11,23 +11,37 @@ A complete tracing setup where:
 - ✅ TraceLoop sidecar **automatically traces** all LLM calls
 - ✅ Traces appear in Jaeger with prompts, responses, and timing
 
-## Option 1: Docker Compose (Recommended)
+## Option 1: Docker Compose
+
+> **⚠️ Note**: If using Podman, see Option 2 (Kubernetes) instead
 
 ### Prerequisites
-- Docker and Docker Compose installed
+- Docker and Docker Compose installed (not Podman)
 - At least 4GB RAM available
 
 ### Steps
 
 1. **Start everything:**
    ```bash
+   # Interactive deployment
+   ./start-all.sh
+   # Select option 1 for Docker Compose
+   
+   # OR manually:
    cd docker-compose
    docker-compose up --build
    ```
    
    Wait 5-10 minutes for Ollama to download the Granite3 model (~2GB).
 
-2. **View traces:**
+2. **Check status:**
+   ```bash
+   ./check-status.sh
+   ```
+   
+   Wait until all services show "Up" status.
+
+3. **View traces:**
    
    Open: http://localhost:16686
    
@@ -35,15 +49,23 @@ A complete tracing setup where:
    - Click "Find Traces"
    - Click any trace to see LLM details
 
-3. **Test the API:**
+4. **Test the API:**
    ```bash
+   # Health check
+   curl http://localhost:8080/health
+   
+   # Chat request
    curl -X POST http://localhost:8080/chat \
      -H "Content-Type: application/json" \
      -d '{"prompt": "Explain distributed tracing"}'
    ```
 
-4. **Watch it work:**
+5. **Watch it work:**
    ```bash
+   # Interactive log viewer
+   ./view-logs.sh
+   
+   # OR directly:
    # Application logs (no tracing code!)
    docker-compose logs -f ollama-simple-app
    
@@ -51,47 +73,101 @@ A complete tracing setup where:
    docker-compose logs -f traceloop-sidecar
    ```
 
-5. **Stop:**
+6. **Stop:**
    ```bash
+   # Interactive stop
+   ./stop-all.sh
+   
+   # OR manually:
    docker-compose down
    ```
 
 ## Option 2: Kubernetes (Minikube)
 
+> **✅ Recommended for Podman users**
+
 ### Prerequisites
 - Minikube and kubectl installed
 - At least 6GB RAM available
+- Docker or Podman for building images
 
 ### Steps
 
-1. **One command deploy:**
+1. **Start Minikube:**
    ```bash
-   ./deploy-minikube.sh
+   minikube start --memory=6144 --cpus=4
    ```
 
-2. **Access Jaeger:**
+2. **Build images locally:**
    ```bash
-   # Get Minikube IP
-   minikube ip
+   # With Podman:
+   cd traceloop-sidecar && podman build -t traceloop-sidecar:latest . && cd ..
+   cd ollama-simple-app && podman build -t ollama-simple-app:latest . && cd ..
    
-   # Visit: http://<minikube-ip>:30686
+   # OR with Docker:
+   cd traceloop-sidecar && docker build -t traceloop-sidecar:latest . && cd ..
+   cd ollama-simple-app && docker build -t ollama-simple-app:latest . && cd ..
+   ```
+
+3. **Load images into Minikube:**
+   ```bash
+   # With Podman:
+   podman save traceloop-sidecar:latest | minikube image load -
+   podman save ollama-simple-app:latest | minikube image load -
    
-   # Or use port-forward:
+   # OR with Docker:
+   docker save traceloop-sidecar:latest | minikube image load -
+   docker save ollama-simple-app:latest | minikube image load -
+   ```
+
+4. **Deploy to Kubernetes:**
+   ```bash
+   kubectl apply -f k8s/
+   ```
+
+5. **Check status (IMPORTANT - wait for pods to be ready):**
+   ```bash
+   # Check deployment status
+   ./check-status.sh
+   
+   # Watch pods until all are Running (takes 5-10 minutes)
+   kubectl get pods -n openllmetry-demo -w
+   ```
+
+6. **Port-forward services (in separate terminals):**
+   ```bash
+   # Terminal 1: Jaeger UI
    kubectl port-forward -n openllmetry-demo svc/jaeger 16686:16686
-   # Then: http://localhost:16686
-   ```
-
-3. **View logs:**
-   ```bash
-   # Application
-   kubectl logs -n openllmetry-demo -l app=ollama-simple-app -c ollama-simple-app -f
    
-   # Sidecar
-   kubectl logs -n openllmetry-demo -l app=ollama-simple-app -c traceloop-sidecar -f
+   # Terminal 2: Application API
+   kubectl port-forward -n openllmetry-demo svc/ollama-simple-app 8080:8080
    ```
 
-4. **Cleanup:**
+7. **Access services:**
+   
+   - **Jaeger UI**: http://localhost:16686
+   - **Application API**: http://localhost:8080
+   
    ```bash
+   # Test the API
+   curl http://localhost:8080/health
+   ```
+
+8. **View logs:**
+   ```bash
+   # Interactive log viewer
+   ./view-logs.sh
+   
+   # OR directly:
+   kubectl logs -n openllmetry-demo -l app=ollama-simple-app -c ollama-simple-app -f
+   ```
+
+9. **Cleanup:**
+   ```bash
+   # Interactive cleanup
+   ./stop-all.sh
+   
+   # OR use cleanup script:
    ./cleanup-minikube.sh
    ```
 

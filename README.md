@@ -7,7 +7,8 @@ This project demonstrates a **sidecar pattern** for adding distributed tracing t
 - **[QUICK-REFERENCE.md](QUICK-REFERENCE.md)** - ⚡ Fast access to URLs, commands, and troubleshooting
 - **[QUICKSTART.md](QUICKSTART.md)** - Get started in 5 minutes
 - **[DEPLOYMENT.md](DEPLOYMENT.md)** - Complete deployment guide with step-by-step instructions and mermaid diagrams
-- **[TESTING.md](TESTING.md)** - Comprehensive testing guide with examples and troubleshooting
+- **[TESTING.md](TESTING.md)** - Comprehensive testing guide with examples
+- **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - 🔧 Common issues and solutions
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** - Detailed architecture and design decisions
 
 ## Key Architecture Principle
@@ -86,7 +87,7 @@ This project demonstrates a **sidecar pattern** for adding distributed tracing t
 
 ## Utility Scripts
 
-Four convenience scripts are provided for easy project management:
+Five convenience scripts are provided for easy project management:
 
 ### 🚀 start-all.sh
 Interactive script to start services in either Docker Compose or Kubernetes:
@@ -97,6 +98,17 @@ Interactive script to start services in either Docker Compose or Kubernetes:
 - Provides menu-driven deployment
 - Builds images and starts all services
 - Shows access information and useful commands
+
+### ✅ check-status.sh
+Check deployment status and get access URLs:
+```bash
+./check-status.sh
+```
+- Shows pod/container status
+- Displays component health
+- Provides access URLs
+- Shows next steps based on current state
+- **Run this after start-all.sh to see deployment progress**
 
 ### 🛑 stop-all.sh
 Interactive script to stop running services:
@@ -150,12 +162,24 @@ Interactive script to commit and push changes to GitHub:
 ## Quick Start with Docker Compose
 
 > **📖 For detailed deployment instructions with troubleshooting, see [DEPLOYMENT.md](DEPLOYMENT.md)**
+>
+> **⚠️ Note**: If using Podman instead of Docker, see [Kubernetes deployment](#deployment-on-kubernetes-minikube) or [TROUBLESHOOTING.md](TROUBLESHOOTING.md#issue-05-using-podman-instead-of-docker)
 
-### Quick Start (Recommended)
+### Quick Start (Docker Users)
 
 ```bash
-# Interactive deployment script
+# 1. Start services
 ./start-all.sh
+# Select option 1
+
+# 2. Check status (wait for all services to be "Up")
+./check-status.sh
+
+# 3. Test the application
+curl http://localhost:8080/health
+
+# 4. View traces in Jaeger
+# Open: http://localhost:16686
 ```
 
 ### Manual Start
@@ -163,6 +187,12 @@ Interactive script to commit and push changes to GitHub:
 ```bash
 cd docker-compose
 docker-compose up --build
+
+# Check status
+docker-compose ps
+
+# Test
+curl http://localhost:8080/health
 ```
 
 This starts:
@@ -226,12 +256,51 @@ docker-compose down -v
 ## Deployment on Kubernetes (Minikube)
 
 > **📖 For detailed Kubernetes deployment with diagrams and troubleshooting, see [DEPLOYMENT.md](DEPLOYMENT.md)**
+>
+> **✅ Recommended for Podman users** - Works better than docker-compose with Podman
 
-### Quick Start (Recommended)
+### Quick Start - Manual Deployment (Recommended for Podman Users)
 
 ```bash
-# Interactive deployment script
+# 1. Ensure Minikube is running
+minikube start --memory=6144 --cpus=4
+
+# 2. Build images locally (with Docker or Podman)
+cd traceloop-sidecar && podman build -t traceloop-sidecar:latest . && cd ..
+cd ollama-simple-app && podman build -t ollama-simple-app:latest . && cd ..
+
+# 3. Load images into Minikube
+podman save traceloop-sidecar:latest | minikube image load -
+podman save ollama-simple-app:latest | minikube image load -
+
+# 4. Deploy to Kubernetes
+kubectl apply -f k8s/
+
+# 5. Check status (pods will take 5-10 minutes to be ready)
+./check-status.sh
+
+# 6. Wait for all pods to be Running
+kubectl get pods -n openllmetry-demo -w
+
+# 7. Port-forward services (in separate terminals)
+kubectl port-forward -n openllmetry-demo svc/jaeger 16686:16686
+kubectl port-forward -n openllmetry-demo svc/ollama-simple-app 8080:8080
+
+# 8. Test the application
+curl http://localhost:8080/health
+
+# 9. View traces in Jaeger
+# Open: http://localhost:16686
+```
+
+### Alternative: Using start-all.sh (Docker Users Only)
+
+```bash
+# For Docker users only (not Podman)
 ./start-all.sh
+# Select option 2
+
+# Then follow steps 5-9 above
 ```
 
 ### Alternative: Automated Script

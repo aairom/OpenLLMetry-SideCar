@@ -2,6 +2,11 @@
 
 Fast access to URLs, commands, and troubleshooting for OpenLLMetry SideCar.
 
+> **⚠️ Important Notes:**
+> - **Podman Users**: Use Kubernetes deployment (Option 2), not Docker Compose
+> - **Minikube DNS Issues**: If builds fail, restart Minikube or build images locally
+> - See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for detailed solutions
+
 ## 🌐 Access URLs
 
 ### Docker Compose Deployment
@@ -30,10 +35,32 @@ minikube ip
 ## 🚀 Quick Start Commands
 
 ### Start Services
+
+**For Docker Users:**
 ```bash
 ./start-all.sh
+# Select option 1 for Docker Compose
 ```
-Interactive menu to choose Docker Compose or Kubernetes deployment.
+
+**For Podman Users (Recommended: Kubernetes):**
+```bash
+# 1. Start Minikube
+minikube start --memory=6144 --cpus=4
+
+# 2. Build images locally
+cd traceloop-sidecar && podman build -t traceloop-sidecar:latest . && cd ..
+cd ollama-simple-app && podman build -t ollama-simple-app:latest . && cd ..
+
+# 3. Load into Minikube
+podman save traceloop-sidecar:latest | minikube image load -
+podman save ollama-simple-app:latest | minikube image load -
+
+# 4. Deploy
+kubectl apply -f k8s/
+
+# 5. Check status
+./check-status.sh
+```
 
 ### Stop Services
 ```bash
