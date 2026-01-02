@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama-app
+  namespace: openllmetry-demo
+  labels:
+    app: ollama-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ollama-app
+  template:
+    metadata:
+      labels:
+        app: ollama-app
+    spec:
+      initContainers:
+      # Init container to wait for Ollama to be ready and pull the model
+      - name: init-ollama
+        image: curlimages/curl:latest
+        command:
+        - sh
+        - -c
+        - |
+          echo "Waiting for Ollama to be ready..."
+          until curl -f http://ollama:11434/api/tags; do
+            echo "Ollama not ready yet, waiting..."
+            sleep 5
+          done
+          echo "Ollama is ready!"
+          
+          echo "Pulling granite3:latest model..."
+          curl -X POST http://ollama:11434/api/pull -d '{"name": "granite3:latest"}' || true
+          echo "Model pull initiated"
+      containers:
+      - name: ollama-app
+        image: ollama-app:latest
+        imagePullPolicy: Never  # For Minikube local images
+        env:
+        - name: OTEL_SERVICE_NAME
+          value: "ollama-app"
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "http://otel-collector:4317"
+        - name: OLLAMA_HOST
+          value: "http://ollama:11434"
+        - name: OLLAMA_MODEL
+          value: "granite3:latest"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      restartPolicy: Always
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ollama-app
+  namespace: openllmetry-demo
+  labels:
+    app: ollama-app
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+  selector:
+    app: ollama-app
+
+# Made with Bob

@@ -1,0 +1,135 @@
+version: '3.8'
+
+services:
+  # Jaeger - Trace visualization backend
+  jaeger:
+    image: jaegertracing/all-in-one:1.53
+    container_name: jaeger
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "4317:4317"    # OTLP gRPC
+      - "4318:4318"    # OTLP HTTP
+      - "14250:14250"  # Jaeger gRPC
+    networks:
+      - openllmetry-network
+
+  # OpenTelemetry Collector
+  otel-collector:
+    build:
+      context: ../collector
+      dockerfile: Dockerfile
+    container_name: otel-collector
+    ports:
+      - "4317:4317"    # OTLP gRPC receiver
+      - "4318:4318"    # OTLP HTTP receiver
+      - "8888:8888"    # Metrics endpoint
+    depends_on:
+      - jaeger
+    networks:
+      - openllmetry-network
+
+  # Ollama - LLM inference engine
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+    networks:
+      - openllmetry-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Ollama model puller - pulls the granite3 model
+  ollama-pull:
+    image: curlimages/curl:latest
+    container_name: ollama-pull
+    depends_on:
+      ollama:
+        condition: service_healthy
+    command: >
+      sh -c "
+        echo 'Pulling granite3:latest model...';
+        curl -X POST http://ollama:11434/api/pull -d '{\"name\": \"granite3:latest\"}';
+        echo 'Model pull initiated';
+      "
+    networks:
+      - openllmetry-network
+
+  # TraceLoop Sidecar - Transparent tracing proxy
+  traceloop-sidecar:
+    build:
+      context: ../traceloop-sidecar
+      dockerfile: Dockerfile
+    container_name: traceloop-sidecar
+    ports:
+      - "11435:11434"  # Expose on different port to avoid conflict
+    environment:
+      - OLLAMA_UPSTREAM=http://ollama:11434
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OTEL_SERVICE_NAME=traceloop-sidecar
+      - TRACED_SERVICE_NAME=ollama-simple-app
+      - PORT=11434
+    depends_on:
+      - otel-collector
+      - ollama
+    networks:
+      - openllmetry-network
+
+  # Simple Ollama App - Application without tracing code
+  # Traffic goes through TraceLoop sidecar for automatic tracing
+  ollama-simple-app:
+    build:
+      context: ../ollama-simple-app
+      dockerfile: Dockerfile
+    container_name: ollama-simple-app
+    ports:
+      - "8080:8080"
+    environment:
+      - OLLAMA_HOST=http://traceloop-sidecar:11434  # Points to sidecar
+      - OLLAMA_MODEL=granite3:latest
+      - PORT=8080
+      - RUN_SAMPLES=true
+    depends_on:
+      - traceloop-sidecar
+      - ollama-pull
+    networks:
+      - openllmetry-network
+
+  # Original Ollama App (with built-in tracing) - kept for comparison
+  ollama-app-instrumented:
+    build:
+      context: ../ollama-app
+      dockerfile: Dockerfile
+    container_name: ollama-app-instrumented
+    environment:
+      - OTEL_SERVICE_NAME=ollama-app-instrumented
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OLLAMA_HOST=http://ollama:11434  # Direct to Ollama
+      - OLLAMA_MODEL=granite3:latest
+    depends_on:
+      - otel-collector
+      - ollama
+      - ollama-pull
+    networks:
+      - openllmetry-network
+    profiles:
+      - with-instrumented  # Only start with: docker-compose --profile with-instrumented up
+
+volumes:
+  ollama-data:
+    driver: local
+
+networks:
+  openllmetry-network:
+    driver: bridge
+
+# Made with Bob
