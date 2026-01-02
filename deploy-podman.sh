@@ -151,12 +151,27 @@ echo "================================================"
 echo ""
 
 # Get Minikube IP
-MINIKUBE_IP=$(minikube ip)
+MINIKUBE_IP=$(minikube ip 2>/dev/null || echo "unavailable")
 
 echo "📊 Current Status:"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-kubectl get pods -n openllmetry-demo
-echo ""
+if kubectl get pods -n openllmetry-demo 2>/dev/null; then
+    echo ""
+else
+    echo "⚠️  Cannot connect to Kubernetes API"
+    echo ""
+    echo "This usually means:"
+    echo "  1. Minikube API server stopped (likely due to disk space)"
+    echo "  2. Minikube needs to be restarted"
+    echo ""
+    echo "To fix:"
+    echo "  minikube stop"
+    echo "  minikube delete"
+    echo "  minikube start --memory=6144 --cpus=4 --disk-size=40g"
+    echo "  ./deploy-podman.sh"
+    echo ""
+    exit 1
+fi
 
 echo "⏳ Note: The ollama-simple-app pod will start after the model is downloaded."
 echo "   This may take 5-10 minutes. Monitor with:"
