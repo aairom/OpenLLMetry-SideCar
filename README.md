@@ -4,15 +4,24 @@ This project demonstrates a **sidecar pattern** for adding distributed tracing t
 
 ## 📚 Documentation
 
-> **🐳 Using Podman?** See **[PODMAN-USERS.md](PODMAN-USERS.md)** for Podman-specific instructions
+> **🐳 Using Podman?** Start here: **[START-HERE-PODMAN.md](START-HERE-PODMAN.md)** ⭐
 
-- **[DIAGRAMS.md](DIAGRAMS.md)** - 📊 **All mermaid diagrams** (architecture, flows, deployment processes)
-- **[PODMAN-USERS.md](PODMAN-USERS.md)** - 🐳 **Essential guide for Podman users**
-- **[QUICK-REFERENCE.md](QUICK-REFERENCE.md)** - ⚡ Fast access to URLs, commands, and troubleshooting
-- **[QUICKSTART.md](QUICKSTART.md)** - Get started in 5 minutes
+### Quick Start Guides
+- **[START-HERE-PODMAN.md](START-HERE-PODMAN.md)** - 🐳 ⭐ **Complete step-by-step guide for Podman users**
+- **[QUICKSTART.md](QUICKSTART.md)** - 🐋 Quick start for Docker users (5 minutes)
+
+### Deployment & Configuration
 - **[DEPLOYMENT.md](DEPLOYMENT.md)** - Complete deployment guide with step-by-step instructions
+- **[PODMAN-USERS.md](PODMAN-USERS.md)** - Detailed Podman deployment guide
 - **[TESTING.md](TESTING.md)** - Comprehensive testing guide with examples
-- **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - 🔧 Common issues and solutions
+
+### Troubleshooting & Reference
+- **[PODMAN-TROUBLESHOOTING.md](PODMAN-TROUBLESHOOTING.md)** - 🔧 Podman-specific troubleshooting
+- **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - General troubleshooting guide
+- **[QUICK-REFERENCE.md](QUICK-REFERENCE.md)** - ⚡ Fast access to URLs and commands
+
+### Architecture & Design
+- **[DIAGRAMS.md](DIAGRAMS.md)** - 📊 All mermaid diagrams (architecture, flows, deployment)
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** - Detailed architecture and design decisions
 
 ## Key Architecture Principle
